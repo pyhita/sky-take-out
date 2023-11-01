@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date: 2023/11/1
  */
 @RestController
-@RequestMapping("/admin/user")
+@RequestMapping("/user/shop")
 @Slf4j
 public class ShopController {
 
