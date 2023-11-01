@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.sky.mapper.DishMapper">
+
+
+    <sql id="columns">
+        name, category_id, price, image, description, status, create_time, create_user, update_time, update_user
+    </sql>
+
+    <insert id="save" useGeneratedKeys="true" keyColumn="id" keyProperty="id">
+        INSERT INTO dish(<include refid="columns"/>)
+        VALUES(#{categoryId}, #{price}, #{image}, #{description}, #{status}, #{createTime}, #{createUser}, #{updateTime}, #{updateUser})
+    </insert>
+
+    <select id="pageQuery" resultType="com.sky.vo.DishVO">
+        SELECT
+            d.id, d.name, d.category_id, d.price, d.image, d.description, d.update_time, c.name AS categoryName,
+        FROM dish d
+        LEFT JOIN category c ON c.id = d.category_id
+        <where>
+            <if test="name!=null">
+                AND d.name like CONCAT('%', #{name}, '%')
+            </if>
+            <if test="categoryId!=null">
+                AND d.category_id = #{categoryId}
+            </if>
+            <if test="status!=null">
+                AND d.status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <resultMap id="dishVOResultMap" type="com.sky.vo.DishVO">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="price" property="price"/>
+        <result column="image" property="image"/>
+        <result column="description" property="description"/>
+        <result column="update_time" property="updateTime"/>
+        <collection property="flavors" ofType="com.sky.entity.DishFlavor">
+            <id property="id" column="id"/>
+            <result property="name" column="name"/>
+            <result property="value" column="value"/>
+            <result property="dishId" column="dish_id"/>
+        </collection>
+    </resultMap>
+
+    <select id="getByIdWithFlavor" resultMap="dishVOResultMap">
+        SELECT
+            d.id,
+            d.name,
+            d.category_id,
+            d.price,
+            d.image,
+            d.description,
+            d.update_time,
+            dh.id,
+            dh.dish_id,
+            dh.name,
+            dh.value
+        FROM dish d
+        LEFT JOIN dish_flavor f ON f.dish_id = d.id
+        WHERE d.id = #{id}
+    </select>
+
+    <update id="update">
+        UPDATE dish
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateUser != null">update_user = #{updateUser},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>
